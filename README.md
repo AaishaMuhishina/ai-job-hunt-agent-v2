@@ -44,6 +44,7 @@ All of this runs on a schedule, unattended, via an n8n workflow.
 - Built with **Scraper Studio's AI-builder** (browser UI) *and* the **Bright Data CLI** (`bdata` — via Node.js/terminal), targeting a niche category page rather than a site already in Bright Data's pre-built scraper library
 - Every scrape returns structured JSON: `job_title`, `company_name`, `location`, `salary`, `tags`, `posting_date`, `apply_link`
 - The Collector ID is triggered directly from an n8n workflow via `POST /dca/trigger`, turning the scraper into a production automation endpoint — no separate deployment step
+- CLI commands (`bdata login`, `scraper create`, `scraper heal`, `scraper approve`) were driven through step-by-step collaboration with an AI coding assistant (Claude) — every decision, from what fields to scrape to how to phrase the self-healing prompts to how the n8n automation should be wired, was made in conversation with AI throughout the build
 
 ## Self-healing, demonstrated
 

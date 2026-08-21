@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Radar — AI Job Hunt Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0B1620; --bg-panel: #101F2E; --line: #1E3242;
+    --amber: #E8A33D; --teal: #3FA796; --text: #EAF0F4; --muted: #7C93A3;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif;
+    min-height:100vh; padding: 48px 24px 80px;
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(63,167,150,0.10), transparent 45%),
+      radial-gradient(circle at 85% 10%, rgba(232,163,61,0.08), transparent 40%);
+  }
+  .wrap{ max-width: 920px; margin: 0 auto; }
+  .hero{ position: relative; border: 1px solid var(--line); border-radius: 4px; padding: 40px 32px; margin-bottom: 32px; overflow: hidden; background: linear-gradient(180deg, var(--bg-panel), var(--bg)); }
+  .scan-line{ position:absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg, transparent, var(--teal), transparent); opacity:0.6; animation: scan 4s ease-in-out infinite; }
+  @keyframes scan{ 0%{ transform: translateY(0); opacity:0; } 10%{ opacity:0.6; } 50%{ transform: translateY(180px); opacity:0.6;} 90%{ opacity:0; } 100%{ transform: translateY(200px); opacity:0;} }
+  @media (prefers-reduced-motion: reduce){ .scan-line{ animation:none; display:none; } }
+  .eyebrow{ font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing: 0.14em; color: var(--teal); text-transform: uppercase; display:flex; align-items:center; gap:8px; margin-bottom: 18px; }
+  .dot{ width:6px; height:6px; border-radius:50%; background: var(--amber); box-shadow: 0 0 8px var(--amber); animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  h1{ font-size: clamp(30px, 5vw, 42px); font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; margin-bottom: 14px; }
+  h1 span{ color: var(--amber); }
+  .sub{ color: var(--muted); font-size: 15px; max-width: 60ch; line-height: 1.55; }
+  .flow{ margin-top: 26px; display:flex; flex-wrap:wrap; gap: 8px; font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--teal); }
+  .flow span{ border:1px solid var(--line); padding: 5px 10px; border-radius: 3px; background: rgba(63,167,150,0.06); }
+  .flow .arrow{ color: var(--muted); border:none; padding: 5px 0; background:none; }
+  .section-label{ font-family:'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 4px 14px; display:flex; justify-content: space-between; align-items:center; }
+  .live-badge{ display:flex; align-items:center; gap:6px; color: var(--amber); }
+  .sheet-panel{ border: 1px solid var(--line); border-radius: 4px; background: var(--bg-panel); padding: 6px; overflow: hidden; }
+  .sheet-panel iframe{ width: 100%; height: 340px; border: none; border-radius: 2px; background: #fff; }
+
+  .table-wrap{ overflow-x: auto; }
+  table{ width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead th{
+    text-align: left; font-family:'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+    padding: 10px 14px; border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  tbody td{ padding: 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:last-child td{ border-bottom: none; }
+  tbody tr:hover{ background: rgba(63,167,150,0.05); }
+  .job-title{ font-weight: 600; color: var(--text); }
+  .job-company{ color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .score-pill{
+    display:inline-block; font-family:'IBM Plex Mono', monospace; font-size: 12px;
+    padding: 3px 10px; border-radius: 12px; background: rgba(232,163,61,0.12);
+    color: var(--amber); border: 1px solid rgba(232,163,61,0.35);
+  }
+  .apply-link{
+    color: var(--teal); text-decoration: none; font-family:'IBM Plex Mono', monospace;
+    font-size: 12px; border: 1px solid var(--line); padding: 5px 10px; border-radius: 3px;
+    white-space: nowrap; transition: border-color 0.15s;
+  }
+  .apply-link:hover{ border-color: var(--teal); }
+  .state-row td{ text-align:center; color: var(--muted); padding: 28px; font-family:'IBM Plex Mono', monospace; font-size: 13px; }
+  .updated-at{ font-family:'IBM Plex Mono', monospace; }
+
+  footer{ margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); display:flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="scan-line"></div>
+    <div class="eyebrow"><span class="dot"></span>Live feed · synced from n8n → Google Sheets</div>
+    <h1>Job signals matched<br>against your <span>skill profile</span>.</h1>
+    <p class="sub">A self-healing Bright Data scraper pulls listings from RemoteOK on a daily schedule. Each posting is scored against your skills — AI, automation, n8n, no-code, low-code. Matches are pushed to Telegram and logged below automatically, so this panel always reflects the latest scan.</p>
+    <div class="flow">
+      <span>Schedule (daily 9am)</span><span class="arrow">→</span>
+      <span>Bright Data scraper</span><span class="arrow">→</span>
+      <span>AI match scoring</span><span class="arrow">→</span>
+      <span>Telegram alert</span><span class="arrow">→</span>
+      <span>This sheet</span>
+    </div>
+  </div>
+
+  <div class="section-label">
+    <span>Ranked matches</span>
+    <span class="live-badge"><span class="dot" style="width:6px;height:6px;"></span><span id="live-status">Live from Google Sheets</span></span>
+  </div>
+
+  <div class="sheet-panel">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Company</th>
+            <th>Location</th>
+            <th>Score</th>
+            <th>Apply</th>
+          </tr>
+        </thead>
+        <tbody id="jobs-body">
+          <tr class="state-row"><td colspan="5">Loading latest matches…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <span>AI Job Hunt Agent · Bright Data Scraper Studio + n8n + Telegram + Sheets</span>
+    <span class="updated-at" id="updated-at">Built for Into the Scrape-Verse, Aug 2026</span>
+  </footer>
+</div>
+
+<script>
+  // Public Sheet: "Anyone with the link – Viewer" must be enabled for this to work.
+  const SHEET_ID = "1dtpG6Rz308QvZCLfsnHQNX4i1GqUwdG_YORWd-3PzsI";
+  const SHEET_TAB = "Sheet1";
+  const FETCH_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_TAB}`;
+  const REFRESH_MS = 60000; // auto-refresh every 60s
+
+  const tbody = document.getElementById("jobs-body");
+  const statusEl = document.getElementById("live-status");
+  const updatedEl = document.getElementById("updated-at");
+
+  function escapeHtml(str){
+    return String(str ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    }[c]));
+  }
+
+  function renderRows(rows){
+    if(!rows || rows.length === 0){
+      tbody.innerHTML = `<tr class="state-row"><td colspan="5">No matches logged yet — check back after the next scan.</td></tr>`;
+      return;
+    }
+    // Newest / highest score first
+    rows.sort((a,b) => (Number(b.Score) || 0) - (Number(a.Score) || 0));
+
+    tbody.innerHTML = rows.map(row => `
+      <tr>
+        <td>
+          <div class="job-title">${escapeHtml(row.Title)}</div>
+        </td>
+        <td class="job-company">${escapeHtml(row.Company)}</td>
+        <td>${escapeHtml(row.Location)}</td>
+        <td><span class="score-pill">${escapeHtml(row.Score)}</span></td>
+        <td>${row.Apply_link ? `<a class="apply-link" href="${escapeHtml(row.Apply_link)}" target="_blank" rel="noopener">Apply →</a>` : "—"}</td>
+      </tr>
+    `).join("");
+  }
+
+  async function loadJobs(){
+    try{
+      statusEl.textContent = "Syncing…";
+      const res = await fetch(FETCH_URL, { cache: "no-store" });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      renderRows(data);
+      statusEl.textContent = "Live from Google Sheets";
+      updatedEl.textContent = `Last synced ${new Date().toLocaleTimeString()}`;
+    }catch(err){
+      console.error("Failed to load sheet data:", err);
+      statusEl.textContent = "Sync failed";
+      tbody.innerHTML = `<tr class="state-row"><td colspan="5">Couldn't load live data. Check sheet sharing settings or try again shortly.</td></tr>`;
+    }
+  }
+
+  loadJobs();
+  setInterval(loadJobs, REFRESH_MS);
+</script>
+</body>
+</html>
